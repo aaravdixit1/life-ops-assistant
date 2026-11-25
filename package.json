@@ -1,0 +1,25 @@
+{
+  "name": "life-ops-assistant",
+  "version": "0.5.34",
+  "private": true,
+  "description": "Autonomous, local-first personal and academic operations engine",
+  "scripts": {
+    "setup": "node scripts/dev.mjs setup",
+    "dev": "node scripts/dev.mjs all",
+    "dev:demo": "node scripts/dev.mjs demo",
+    "dev:all": "node scripts/dev.mjs all",
+    "backend": "node scripts/dev.mjs backend",
+    "frontend": "node scripts/dev.mjs frontend",
+    "demo": "node scripts/dev.mjs demo",
+    "db": "node scripts/dev.mjs db",
+    "stop": "node scripts/dev.mjs stop",
+    "canvas:login": "node scripts/dev.mjs canvas-login",
+    "test": "npm --prefix frontend test",
+    "test:backend": "cd backend && .venv/bin/pytest -q",
+    "test:all": "node scripts/dev.mjs test",
+    "build": "node scripts/dev.mjs build"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

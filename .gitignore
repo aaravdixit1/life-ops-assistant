@@ -1,0 +1,61 @@
+# Secrets & credentials (STRICT - NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+credentials.json
+token.json
+storageState.json
+
+# Database
+postgres_data/
+
+# AI Agent harnesses, skills, and rule artifacts
+.agents/
+.impeccable/
+skills-lock.json
+.gemini/
+.cursor/
+.claude/
+.windsurf/
+.copilot/
+.cline/
+.continue/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+ENV/
+*.egg
+
+# Testing & Coverage
+htmlcov/
+.coverage
+.coverage.*
+.pytest_cache/
+coverage/
+screenshots/
+
+# Node & Next.js
+node_modules/
+.next/
+out/
+.vercel/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
