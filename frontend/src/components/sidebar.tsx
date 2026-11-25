@@ -18,7 +18,6 @@ import {
   PanelLeftClose,
 } from "lucide-react";
 import { AppearancePopover } from "@/components/appearance-popover";
-import { DemoModeIndicator } from "@/components/demo-badge";
 import { pollCanvasNow, toggleExamMode } from "@/lib/api";
 import { useProfile } from "@/components/profile-provider";
 
@@ -124,9 +123,6 @@ export function Sidebar({
             </button>
           )}
         </div>
-
-        {/* Demo Mode Badge if active */}
-        <DemoModeIndicator />
 
         {/* Global Exam Mode Toggle directly beneath identity chip */}
         <button

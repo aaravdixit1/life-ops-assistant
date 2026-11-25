@@ -4,12 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:demo": "NEXT_PUBLIC_DEMO_MODE=true next dev",
     "build": "next build",
-    "build:demo": "NEXT_PUBLIC_DEMO_MODE=true next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test tests/demo-mode.test.mjs"
+    "test": "tsx --test tests/lib.test.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.72.0",

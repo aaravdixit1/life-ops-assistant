@@ -53,7 +53,6 @@ import {
   logRecipe,
   type NearbyStoresResponse,
 } from "@/lib/api";
-import { PERSONA } from "@/lib/persona";
 import { useProfile } from "@/components/profile-provider";
 import { toInputDate } from "@/lib/formatters";
 import { ThemedTimeSelect } from "@/components/calendar/event-modals";
@@ -111,7 +110,7 @@ const COMMON_INGREDIENTS: IngredientItem[] = [
 ];
 
 export default function HealthPage() {
-  const { profile, isDemo, displayName, locationLabel } = useProfile();
+  const { profile, displayName, locationLabel } = useProfile();
   const [activeTab, setActiveTab] = useState<TabMode>("macros");
   const [macroSubView, setMacroSubView] = useState<MacroSubView>("today");
   const [meals, setMeals] = useState<any[]>([]);
@@ -751,9 +750,7 @@ export default function HealthPage() {
           </h1>
           <p className="text-xs text-[var(--text-muted)] mt-0.5 font-sans flex flex-wrap items-center gap-x-2 gap-y-1">
             <span>
-              {isDemo
-                ? PERSONA.healthHeadline
-                : `${displayName} · ${profile?.daily_calories_target || 2600} kcal · ${profile?.daily_protein_g || 155}g Protein Target${profile?.dietary_notes ? ` · ${profile.dietary_notes}` : ""}`}
+              {`${displayName} · ${profile?.daily_calories_target || 2600} kcal · ${profile?.daily_protein_g || 155}g Protein Target${profile?.dietary_notes ? ` · ${profile.dietary_notes}` : ""}`}
             </span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--bg-elevated)] border border-[var(--border-hairline)] text-[11px] text-[var(--text-secondary)]">
               <MapPin className="w-3 h-3 text-[var(--accent-primary)]" />

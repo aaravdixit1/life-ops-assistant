@@ -120,7 +120,7 @@ function normalizeWebcalUrl(raw: string): string {
 
 export default function SetupPage() {
   const router = useRouter();
-  const { isDemo, refreshProfile, activeAssignmentsCount } = useProfile();
+  const { refreshProfile, activeAssignmentsCount } = useProfile();
 
   const [activeStep, setActiveStep] = useState<StepId>(1);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -917,17 +917,6 @@ export default function SetupPage() {
           </Link>
         </div>
       </header>
-
-      {isDemo && (
-        <div className="px-3.5 py-2.5 rounded-md border border-[var(--border-hairline)] bg-[var(--bg-elevated)] text-xs text-[var(--text-secondary)] flex items-center justify-between gap-3">
-          <span>
-            Standalone Demo Mode is active — changes persist locally in your browser without external requests.
-          </span>
-          <span className="font-mono text-[11px] text-[var(--text-muted)] shrink-0">
-            localStorage
-          </span>
-        </div>
-      )}
 
       {statusNotice && (
         <div
@@ -2333,7 +2322,7 @@ export default function SetupPage() {
                   <div className="pt-5 border-t border-[var(--border-hairline)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="text-xs text-[var(--text-muted)]">
                       {confirmClearStep
-                        ? "Remove sample seed events and demo assignments? Your profile and connected feeds remain intact."
+                        ? "Remove sample seed events and assignments? Your profile and connected feeds remain intact."
                         : "Replace sample seed data once your real calendars and Canvas feed are connected."}
                     </div>
 

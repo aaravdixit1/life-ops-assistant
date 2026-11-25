@@ -8,7 +8,6 @@ import {
   Search,
   Clock,
   ArrowRight,
-  Building2,
   Calendar,
   Upload,
   Trash2,
@@ -30,52 +29,8 @@ import { FormattedMarkdown } from "@/components/ui/formatted-content";
 import { getHiddenCalendarIds, isCalendarVisible } from "@/lib/calendar-visibility";
 import { EventDetailModal } from "@/components/calendar/event-modals";
 
-const DEMO_CAREER_BLOCKS = [
-  {
-    title: "Daily LeetCode Practice",
-    time: "2:00 PM – 3:00 PM (Mon – Fri)",
-    focus: "Data Structures & Algorithms (Trees, Graphs, DP, Sliding Window)",
-    target: "Algorithms prep & SWE technical rounds",
-    badge: "Technical Prep",
-  },
-  {
-    title: "Internship Applications & Outreach",
-    time: "3:00 PM – 4:00 PM (Mon – Fri)",
-    focus: "Company portals, resume tailoring, recruiter follow-ups",
-    target: "Systems & SWE Internships",
-    badge: "Applications",
-  },
-];
-
-const DEMO_APPLICATIONS = [
-  {
-    company: "Palantir Technologies",
-    role: "Software Engineer Intern (Forward Deployed)",
-    location: "New York, NY / Washington, DC",
-    status: "Applied",
-    badgeColor: "bg-[var(--semantic-success)]/15 text-[var(--semantic-success)] border-[var(--semantic-success)]/30",
-    date: "Submitted Nov 4",
-  },
-  {
-    company: "Bloomberg L.P.",
-    role: "Software Engineering Intern - 2027",
-    location: "New York, NY",
-    status: "Technical Screen",
-    badgeColor: "bg-[var(--accent-primary)]/15 text-[var(--accent-primary)] border-[var(--accent-primary)]/30",
-    date: "Scheduled Nov 18",
-  },
-  {
-    company: "Datadog",
-    role: "Software Engineer Intern - Core Systems",
-    location: "New York, NY",
-    status: "Applied",
-    badgeColor: "bg-[var(--semantic-success)]/15 text-[var(--semantic-success)] border-[var(--semantic-success)]/30",
-    date: "Submitted Nov 8",
-  },
-];
-
 export default function CareerPage() {
-  const { isDemo, displayName, profile } = useProfile();
+  const { displayName, profile } = useProfile();
   const [ragQuery, setRagQuery] = useState("");
   const [ragResults, setRagResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
@@ -300,8 +255,6 @@ export default function CareerPage() {
           <span>
             {careerBlocks.length > 0
               ? `${careerBlocks.length} Active Career Series Synced`
-              : isDemo
-              ? `${DEMO_APPLICATIONS.length} Demo Applications`
               : "No career calendars synced yet"}
           </span>
         </div>
@@ -359,24 +312,6 @@ export default function CareerPage() {
               </div>
             ))}
           </div>
-        ) : isDemo ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {DEMO_CAREER_BLOCKS.map((block, idx) => (
-              <div
-                key={idx}
-                className="p-4 rounded-lg border border-[var(--border-hairline)] bg-[var(--bg-elevated)] space-y-2.5 font-sans"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-sm font-medium text-[var(--text-primary)]">{block.title}</h3>
-                  <span className="px-2 py-0.5 rounded text-xs font-medium bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-hairline)] whitespace-nowrap shrink-0">
-                    {block.badge}
-                  </span>
-                </div>
-                <div className="text-xs text-[var(--text-secondary)] tabular-nums">{block.time}</div>
-                <p className="text-xs text-[var(--text-muted)] leading-relaxed">{block.focus}</p>
-              </div>
-            ))}
-          </div>
         ) : (
           <div className="p-6 rounded-lg border border-dashed border-[var(--border-hairline)] bg-[var(--bg-elevated)]/60 text-xs text-[var(--text-muted)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span>
@@ -392,46 +327,6 @@ export default function CareerPage() {
           </div>
         )}
       </div>
-
-      {/* Demo Pipeline only shown in Demo Mode */}
-      {isDemo && (
-        <div className="p-5 rounded-lg border border-[var(--border-hairline)] bg-[var(--bg-elevated)] space-y-4 font-sans">
-          <div className="flex items-center justify-between pb-3 border-b border-[var(--border-hairline)]">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-[var(--accent-primary)]" />
-              <h2 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
-                Sample Internship Pipeline (Demo)
-              </h2>
-            </div>
-            <span className="px-2 py-0.5 rounded text-xs font-medium bg-[var(--bg-surface)] text-[var(--text-secondary)] border border-[var(--border-hairline)]">
-              Hiring Cycle: Active
-            </span>
-          </div>
-
-          <div className="divide-y divide-[var(--border-hairline)]/40 border border-[var(--border-hairline)] rounded-md overflow-hidden bg-[var(--bg-surface)]">
-            {DEMO_APPLICATIONS.map((app, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-[var(--bg-hover)] transition-colors"
-              >
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold text-[var(--text-primary)]">{app.company}</span>
-                    <span className="text-micro text-[var(--text-muted)]">· {app.location}</span>
-                  </div>
-                  <p className="text-xs text-[var(--text-secondary)]">{app.role}</p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-micro text-[var(--text-muted)] tabular-nums">{app.date}</span>
-                  <span className={`px-2 py-0.5 rounded text-micro font-medium border ${app.badgeColor}`}>
-                    {app.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Resume Upload, Library & Career Semantic Search */}
       <div className="p-5 rounded-lg border border-[var(--border-hairline)] bg-[var(--bg-elevated)] space-y-4 font-sans">

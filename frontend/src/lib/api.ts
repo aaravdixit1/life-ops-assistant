@@ -1,28 +1,10 @@
 /**
  * API Client for FastAPI Life-Ops Backend
- *
- * In Standalone Demo Mode (NEXT_PUBLIC_DEMO_MODE=true), all calls are intercepted
- * and served client-side with zero external network requests.
  */
-
-import { isDemoMode } from "./demo-mode";
-import { assertNoDemoNetworkCall, installDemoNetworkGuard } from "./demo-guard";
-import * as demo from "./demo-service";
-import { queryDemoRag } from "./demo-data";
-
-// Install runtime network fetch guard when in browser
-if (typeof window !== "undefined" && isDemoMode()) {
-  installDemoNetworkGuard();
-}
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  // Hard Invariant Guard: Throw and log loudly if any network call is attempted in demo mode
-  if (isDemoMode()) {
-    assertNoDemoNetworkCall(endpoint);
-  }
-
   const url = `${API_BASE}${endpoint}`;
   try {
     const res = await fetch(url, {
@@ -47,37 +29,25 @@ async function request<T>(endpoint: string, options?: RequestInit): Promise<T> {
 // ── Canvas & Academics ──────────────────────────────────────────────
 
 export const getAssignments = async (status = "active", course?: string) => {
-  if (isDemoMode()) {
-    return demo.getDemoAssignments(status, course);
-  }
   return request<any[]>(`/api/canvas/assignments?status=${status}${course ? `&course=${course}` : ""}`);
 };
 
 export const getCanvasStatus = async () => {
-  if (isDemoMode()) {
-    return { session_valid: true, mode: "demo_standalone" };
-  }
   return request<{ session_valid: boolean; mode: string }>("/api/canvas/session-status");
 };
 
 export const pollCanvasNow = async () => {
-  if (isDemoMode()) {
-    return { status: "success", stats: { active: 4, completed: 2, updated: 0 } };
-  }
-  return request<{ status: string; stats?: any; message?: string; code?: number; reason?: string }>("/api/canvas/poll-now", { method: "POST" });
+  return request<{ status: string; stats?: any; message?: string; code?: number; reason?: string }>(
+    "/api/canvas/poll-now",
+    { method: "POST" }
+  );
 };
 
 export const toggleAssignmentSubmission = async (assignmentId: string) => {
-  if (isDemoMode()) {
-    return demo.toggleDemoAssignmentSubmission(assignmentId);
-  }
   return request<any>(`/api/canvas/assignments/${assignmentId}/toggle-submit`, { method: "POST" });
 };
 
 export const refreshCanvasSession = async () => {
-  if (isDemoMode()) {
-    return { status: "simulated", message: "Demo mode: Canvas authentication is simulated." };
-  }
   return request<any>("/api/canvas/refresh-session", { method: "POST" });
 };
 
@@ -91,9 +61,6 @@ export interface AssignmentSections {
 }
 
 export const analyzeAssignment = async (assignmentId: string, force = false) => {
-  if (isDemoMode()) {
-    return demo.analyzeDemoAssignment(assignmentId, force);
-  }
   return request<{
     status: string;
     cached?: boolean;
@@ -111,9 +78,6 @@ export const analyzeAssignment = async (assignmentId: string, force = false) => 
 };
 
 export const analyzeAssignmentsBatch = async (limit = 8, force = false) => {
-  if (isDemoMode()) {
-    return demo.analyzeDemoAssignmentsBatch(limit);
-  }
   return request<{
     status: string;
     analyzed_count: number;
@@ -154,22 +118,6 @@ export const getCalendarEvents = async (
       : limitOrOptions || {};
   const limit = opts.limit ?? 500;
 
-  if (isDemoMode()) {
-    let items = demo.getDemoEvents();
-    if (opts.calendar_id && opts.calendar_id !== "all") {
-      items = items.filter((e) => (e.calendar_id || "primary") === opts.calendar_id);
-    }
-    if (opts.start_time) {
-      const startMs = new Date(opts.start_time).getTime();
-      items = items.filter((e) => new Date(e.end_time).getTime() >= startMs);
-    }
-    if (opts.end_time) {
-      const endMs = new Date(opts.end_time).getTime();
-      items = items.filter((e) => new Date(e.start_time).getTime() <= endMs);
-    }
-    return items.slice(0, limit);
-  }
-
   const params = new URLSearchParams();
   params.set("limit", String(limit));
   if (opts.start_time) params.set("start_time", opts.start_time);
@@ -179,9 +127,6 @@ export const getCalendarEvents = async (
 };
 
 export const getCalendars = async () => {
-  if (isDemoMode()) {
-    return demo.getDemoCalendars();
-  }
   return request<
     Array<{
       calendar_id: string;
@@ -196,9 +141,6 @@ export const getCalendars = async () => {
 };
 
 export const deleteCalendarById = async (calendarId: string) => {
-  if (isDemoMode()) {
-    return demo.deleteDemoCalendar(calendarId);
-  }
   return request<{
     status: string;
     calendar_id: string;
@@ -222,9 +164,6 @@ export const createCalendarEvent = async (data: {
   recurring_rule?: string;
   repeat?: string;
 }) => {
-  if (isDemoMode()) {
-    return demo.createDemoEvent(data);
-  }
   return request<any>("/api/calendar/events", {
     method: "POST",
     body: JSON.stringify(data),
@@ -245,9 +184,6 @@ export const updateCalendarEvent = async (
     calendar_name?: string;
   }
 ) => {
-  if (isDemoMode()) {
-    return demo.updateDemoEvent(id, data);
-  }
   return request<any>(`/api/calendar/events/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
@@ -258,9 +194,6 @@ export const deleteCalendarEvent = async (
   id: string,
   mode: "single" | "week" | "series" = "single"
 ) => {
-  if (isDemoMode()) {
-    return demo.deleteDemoEvent(id);
-  }
   return request<any>(`/api/calendar/events/${id}?mode=${mode}`, {
     method: "DELETE",
   });
@@ -272,9 +205,6 @@ export const requestAdjustment = async (data: {
   new_end: string;
   reason: string;
 }) => {
-  if (isDemoMode()) {
-    return { status: "staged", message: "Adjustment proposal staged for review." };
-  }
   return request<any>("/api/calendar/request-adjustment", {
     method: "POST",
     body: JSON.stringify(data),
@@ -286,9 +216,6 @@ export const detectConflicts = async (data: {
   end_time: string;
   exclude_id?: string;
 }) => {
-  if (isDemoMode()) {
-    return demo.detectDemoConflicts(data);
-  }
   return request<any[]>("/api/calendar/detect-conflicts", {
     method: "POST",
     body: JSON.stringify(data),
@@ -296,17 +223,10 @@ export const detectConflicts = async (data: {
 };
 
 export const exportIcsCalendar = () => {
-  if (isDemoMode()) {
-    demo.exportDemoIcsFile();
-    return;
-  }
   window.open(`${API_BASE}/api/calendar/export-ics`, "_blank");
 };
 
 export const importIcsCalendar = async (formData: FormData) => {
-  if (isDemoMode()) {
-    return demo.importDemoIcs();
-  }
   const res = await fetch(`${API_BASE}/api/calendar/import-ics`, {
     method: "POST",
     body: formData,
@@ -320,46 +240,28 @@ export const importIcsCalendar = async (formData: FormData) => {
 // ── Autopilot & Schedule Rebalancer ─────────────────────────────────
 
 export const getAutopilotLogs = async (limit = 30) => {
-  if (isDemoMode()) {
-    return demo.getDemoAutopilotLogs().slice(0, limit);
-  }
   return request<any[]>(`/api/autopilot/logs?limit=${limit}`);
 };
 
 export const undoAutopilotAction = async (logId: string) => {
-  if (isDemoMode()) {
-    return demo.undoDemoAutopilotAction(logId);
-  }
   return request<any>(`/api/autopilot/undo/${logId}`, { method: "POST" });
 };
 
 export const getPendingActions = async () => {
-  if (isDemoMode()) {
-    return demo.getDemoPendingActions();
-  }
   return request<any[]>("/api/autopilot/pending");
 };
 
 export const approveAction = async (id: string) => {
-  if (isDemoMode()) {
-    return demo.approveDemoAction(id);
-  }
   return request<any>(`/api/autopilot/pending/${id}/approve`, { method: "POST" });
 };
 
 export const rejectAction = async (id: string) => {
-  if (isDemoMode()) {
-    return demo.rejectDemoAction(id);
-  }
   return request<any>(`/api/autopilot/pending/${id}/reject`, { method: "POST" });
 };
 
 // ── Health & Nutrition ──────────────────────────────────────────────
 
 export const getMeals = async (mealType?: string, radiusMiles?: number) => {
-  if (isDemoMode()) {
-    return demo.getDemoMeals();
-  }
   const params = new URLSearchParams();
   if (mealType) params.set("meal_type", mealType);
   if (radiusMiles) params.set("radius_miles", String(radiusMiles));
@@ -368,18 +270,12 @@ export const getMeals = async (mealType?: string, radiusMiles?: number) => {
 };
 
 export const deleteRecipe = async (recipeId: string) => {
-  if (isDemoMode()) {
-    return demo.deleteDemoRecipe(recipeId);
-  }
   return request<{ status: string; id: string; name?: string }>(`/api/health/recipes/${recipeId}`, {
     method: "DELETE",
   });
 };
 
 export const getWeeklyBudget = async (radiusMiles?: number) => {
-  if (isDemoMode()) {
-    return demo.getDemoWeeklyBudget();
-  }
   const qs = radiusMiles ? `?radius_miles=${encodeURIComponent(String(radiusMiles))}` : "";
   return request<any>(`/api/health/weekly-budget${qs}`);
 };
@@ -413,17 +309,11 @@ export interface NearbyStoresResponse {
 }
 
 export const getNearbyGroceryStores = async (radiusMiles?: number): Promise<NearbyStoresResponse> => {
-  if (isDemoMode()) {
-    return demo.getDemoNearbyStores(radiusMiles);
-  }
   const qs = radiusMiles ? `?radius_miles=${encodeURIComponent(String(radiusMiles))}` : "";
   return request<NearbyStoresResponse>(`/api/health/nearby-stores${qs}`);
 };
 
 export const getDailyMacroLog = async (date?: string) => {
-  if (isDemoMode()) {
-    return demo.getDemoDailyMacroLog();
-  }
   return request<any>(`/api/health/daily-log${date ? `?date=${encodeURIComponent(date)}` : ""}`);
 };
 
@@ -437,9 +327,6 @@ export const logMeal = async (data: {
   meal_type?: string;
   date?: string;
 }) => {
-  if (isDemoMode()) {
-    return demo.logDemoMeal(data);
-  }
   return request<any>("/api/health/log-meal", {
     method: "POST",
     body: JSON.stringify(data),
@@ -447,16 +334,10 @@ export const logMeal = async (data: {
 };
 
 export const deleteLoggedMeal = async (logId: string) => {
-  if (isDemoMode()) {
-    return demo.deleteDemoLoggedMeal(logId);
-  }
   return request<any>(`/api/health/log-meal/${logId}`, { method: "DELETE" });
 };
 
 export const resetDailyLog = async (date?: string) => {
-  if (isDemoMode()) {
-    return demo.resetDemoDailyLog();
-  }
   return request<any>(`/api/health/reset-daily-log${date ? `?date=${encodeURIComponent(date)}` : ""}`, {
     method: "POST",
   });
@@ -468,9 +349,6 @@ export const searchIngredients = async (
   radiusMiles?: number,
   store?: string
 ) => {
-  if (isDemoMode()) {
-    return demo.searchDemoIngredients(q, category);
-  }
   const params = new URLSearchParams();
   if (q) params.set("q", q);
   if (category && category !== "all") params.set("category", category);
@@ -481,9 +359,6 @@ export const searchIngredients = async (
 };
 
 export const getGroceryPrices = async (category?: string) => {
-  if (isDemoMode()) {
-    return demo.getDemoGroceryPrices();
-  }
   return request<any[]>(`/api/health/grocery-prices${category ? `?category=${encodeURIComponent(category)}` : ""}`);
 };
 
@@ -494,16 +369,6 @@ export const scheduleMealPrep = async (data: {
   meals: string[];
   notes?: string;
 }) => {
-  if (isDemoMode()) {
-    return demo.createDemoEvent({
-      summary: "Meal Prep: " + data.meals.join(", "),
-      start_time: data.start_time || new Date().toISOString(),
-      end_time: data.end_time || new Date(Date.now() + 7200000).toISOString(),
-      calendar_name: "Health & Fitness",
-      color: "#10b981",
-      description: data.notes || "Scheduled via Health & Meal Prep",
-    });
-  }
   return request<any>("/api/health/schedule-meal-prep", {
     method: "POST",
     body: JSON.stringify(data),
@@ -511,9 +376,6 @@ export const scheduleMealPrep = async (data: {
 };
 
 export const getMacroHistory = async (days = 7, endDate?: string) => {
-  if (isDemoMode()) {
-    return demo.getDemoMacroHistory();
-  }
   const params = new URLSearchParams();
   if (days) params.set("days", String(days));
   if (endDate) params.set("end_date", endDate);
@@ -532,9 +394,6 @@ export const createRecipe = async (data: {
   instructions: string;
   tags?: string[];
 }) => {
-  if (isDemoMode()) {
-    return demo.createDemoRecipe(data);
-  }
   return request<any>("/api/health/recipes", {
     method: "POST",
     body: JSON.stringify(data),
@@ -542,9 +401,6 @@ export const createRecipe = async (data: {
 };
 
 export const logRecipe = async (recipeId: string, date?: string) => {
-  if (isDemoMode()) {
-    return demo.logDemoRecipe(recipeId);
-  }
   return request<any>(`/api/health/log-recipe/${recipeId}${date ? `?date=${encodeURIComponent(date)}` : ""}`, {
     method: "POST",
   });
@@ -553,9 +409,6 @@ export const logRecipe = async (recipeId: string, date?: string) => {
 // ── AI Command Bar ──────────────────────────────────────────────────
 
 export const sendAiQuery = async (data: { query: string; exam_mode?: boolean }) => {
-  if (isDemoMode()) {
-    return demo.simulateAiQuery(data);
-  }
   return request<{
     response: string;
     routed_to: string;
@@ -575,9 +428,6 @@ export const sendAiQuery = async (data: { query: string; exam_mode?: boolean }) 
 };
 
 export const toggleExamMode = async (enabled: boolean) => {
-  if (isDemoMode()) {
-    return demo.toggleDemoExamMode(enabled);
-  }
   return request<{ status: string; exam_mode: boolean }>("/api/ai/exam-mode", {
     method: "POST",
     body: JSON.stringify({ enabled }),
@@ -587,16 +437,10 @@ export const toggleExamMode = async (enabled: boolean) => {
 // ── Daily Briefing & Direct Line AI ─────────────────────────────────
 
 export const getDailyBrief = async () => {
-  if (isDemoMode()) {
-    return demo.getDemoDailyBrief();
-  }
   return request<any>("/api/brief/daily");
 };
 
 export const getRandomCuriosity = async () => {
-  if (isDemoMode()) {
-    return demo.getRandomDemoCuriosity();
-  }
   return request<{
     id: string;
     category: string;
@@ -609,9 +453,6 @@ export const getRandomCuriosity = async () => {
 };
 
 export const adoptDailyPlan = async (planId: string) => {
-  if (isDemoMode()) {
-    return demo.adoptDemoDailyPlan(planId);
-  }
   return request<{ status: string; plan_id: string; plan_name: string; events_created: number; message: string }>(
     "/api/brief/adopt-plan",
     {
@@ -647,17 +488,11 @@ export interface AssistantSessionDetail {
 }
 
 export const getAssistantSessions = async (): Promise<AssistantSessionSummary[]> => {
-  if (isDemoMode()) {
-    return demo.getDemoAssistantSessions();
-  }
   const res = await request<{ sessions: AssistantSessionSummary[] }>("/api/brief/sessions");
   return Array.isArray(res?.sessions) ? res.sessions : [];
 };
 
 export const createAssistantSession = async (title?: string): Promise<AssistantSessionSummary> => {
-  if (isDemoMode()) {
-    return demo.createDemoAssistantSession(title);
-  }
   const res = await request<{ session: AssistantSessionSummary }>("/api/brief/sessions", {
     method: "POST",
     body: JSON.stringify({ title }),
@@ -666,17 +501,11 @@ export const createAssistantSession = async (title?: string): Promise<AssistantS
 };
 
 export const getAssistantSession = async (sessionId: string): Promise<AssistantSessionDetail> => {
-  if (isDemoMode()) {
-    return demo.getDemoAssistantSession(sessionId);
-  }
   const res = await request<{ session: AssistantSessionDetail }>(`/api/brief/sessions/${encodeURIComponent(sessionId)}`);
   return res.session;
 };
 
 export const renameAssistantSession = async (sessionId: string, title: string) => {
-  if (isDemoMode()) {
-    return demo.renameDemoAssistantSession(sessionId, title);
-  }
   return request<{ status: string; session: AssistantSessionSummary }>(
     `/api/brief/sessions/${encodeURIComponent(sessionId)}`,
     {
@@ -687,9 +516,6 @@ export const renameAssistantSession = async (sessionId: string, title: string) =
 };
 
 export const deleteAssistantSession = async (sessionId: string) => {
-  if (isDemoMode()) {
-    return demo.deleteDemoAssistantSession(sessionId);
-  }
   return request<{ status: string; id: string }>(
     `/api/brief/sessions/${encodeURIComponent(sessionId)}`,
     {
@@ -704,9 +530,6 @@ export const sendDirectLineMessage = async (
   history?: Array<{ role: string; content: string }>,
   sessionId?: string | null
 ) => {
-  if (isDemoMode()) {
-    return demo.simulateDirectLineMessage(message, sessionId || undefined);
-  }
   return request<any>("/api/brief/direct-line", {
     method: "POST",
     body: JSON.stringify({
@@ -720,9 +543,6 @@ export const sendDirectLineMessage = async (
 };
 
 export const getUserKnowledge = async (category?: string) => {
-  if (isDemoMode()) {
-    return demo.getDemoUserKnowledge(category);
-  }
   return request<any[]>(`/api/brief/knowledge${category ? `?category=${category}` : ""}`);
 };
 
@@ -732,9 +552,6 @@ export const createUserKnowledge = async (item: {
   content?: string;
   metadata?: any;
 }) => {
-  if (isDemoMode()) {
-    return demo.createDemoUserKnowledge(item);
-  }
   return request<{
     status: string;
     item: any;
@@ -753,9 +570,6 @@ export const updateUserKnowledge = async (
     metadata?: any;
   }
 ) => {
-  if (isDemoMode()) {
-    return demo.updateDemoUserKnowledge(itemId, data);
-  }
   return request<{
     status: string;
     item: any;
@@ -766,9 +580,6 @@ export const updateUserKnowledge = async (
 };
 
 export const deleteUserKnowledge = async (itemId: string) => {
-  if (isDemoMode()) {
-    return demo.deleteDemoUserKnowledge(itemId);
-  }
   return request<{ status: string; message: string }>(`/api/brief/knowledge/${itemId}`, {
     method: "DELETE",
   });
@@ -783,15 +594,6 @@ export const commitAssistantEvent = async (eventData: {
   color?: string;
   source?: string;
 }) => {
-  if (isDemoMode()) {
-    const created = demo.createDemoEvent(eventData);
-    return {
-      status: "success",
-      event_id: created.id,
-      event: created,
-      message: `Committed "${eventData.summary}" to schedule.`,
-    };
-  }
   return request<{
     status: string;
     event_id: string;
@@ -806,9 +608,6 @@ export const commitAssistantEvent = async (eventData: {
 // ── RAG Semantic Search ─────────────────────────────────────────────
 
 export const searchRag = async (query: string, limit = 4, sourceType?: string) => {
-  if (isDemoMode()) {
-    return queryDemoRag(query, limit, sourceType);
-  }
   return request<any[]>("/api/rag/search", {
     method: "POST",
     body: JSON.stringify({ query, limit, source_type: sourceType }),
@@ -825,18 +624,12 @@ export interface IndexedDocumentItem {
 }
 
 export const getIndexedDocuments = async (sourceType?: string): Promise<IndexedDocumentItem[]> => {
-  if (isDemoMode()) {
-    return demo.getDemoIndexedDocuments(sourceType);
-  }
   const qs = sourceType ? `?source_type=${encodeURIComponent(sourceType)}` : "";
   const res = await request<{ documents: IndexedDocumentItem[] }>(`/api/rag/documents${qs}`);
   return Array.isArray(res?.documents) ? res.documents : [];
 };
 
 export const deleteIndexedDocument = async (sourcePath: string, sourceType?: string) => {
-  if (isDemoMode()) {
-    return demo.deleteDemoIndexedDocument(sourcePath);
-  }
   const params = new URLSearchParams({ source_path: sourcePath });
   if (sourceType) params.set("source_type", sourceType);
   return request<{ status: string; source_path: string; chunks_deleted: number }>(
@@ -846,9 +639,6 @@ export const deleteIndexedDocument = async (sourcePath: string, sourceType?: str
 };
 
 export const uploadResumeDocument = async (file: File) => {
-  if (isDemoMode()) {
-    return demo.uploadDemoResumeDocument(file.name);
-  }
   const fd = new FormData();
   fd.append("file", file);
   fd.append("source_type", "resume");
@@ -951,18 +741,12 @@ export interface CalendarFeed {
 }
 
 export const getUserProfile = async () => {
-  if (isDemoMode()) {
-    return demo.getDemoUserProfile();
-  }
   return request<{ profile?: UserProfile; setup_status?: SetupStatus } & Partial<UserProfile>>(
     "/api/profile"
   );
 };
 
 export const updateUserProfile = async (data: Partial<UserProfile>) => {
-  if (isDemoMode()) {
-    return demo.updateDemoUserProfile(data);
-  }
   return request<{ status?: string; profile?: UserProfile; setup_status?: SetupStatus } & Partial<UserProfile>>(
     "/api/profile",
     {
@@ -993,9 +777,6 @@ export const geocodeLocation = async (
           region: queryOrPayload.region || "",
         };
 
-  if (isDemoMode()) {
-    return demo.geocodeDemoLocation(payload.query);
-  }
   return request<{ results?: GeocodeCandidate[] } | GeocodeCandidate[]>("/api/profile/geocode", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -1003,9 +784,6 @@ export const geocodeLocation = async (
 };
 
 export const getCalendarFeeds = async () => {
-  if (isDemoMode()) {
-    return demo.getDemoCalendarFeeds();
-  }
   return request<CalendarFeed[] | { feeds?: CalendarFeed[] }>("/api/profile/calendar-feeds");
 };
 
@@ -1016,9 +794,6 @@ export const addCalendarFeed = async (data: {
   calendar_id?: string;
   color?: string;
 }) => {
-  if (isDemoMode()) {
-    return demo.addDemoCalendarFeed(data);
-  }
   return request<CalendarFeed & { feed?: CalendarFeed; status?: string }>(
     "/api/profile/calendar-feeds",
     {
@@ -1029,36 +804,24 @@ export const addCalendarFeed = async (data: {
 };
 
 export const syncCalendarFeed = async (id: string) => {
-  if (isDemoMode()) {
-    return demo.syncDemoCalendarFeed(id);
-  }
   return request<any>(`/api/profile/calendar-feeds/${id}/sync`, {
     method: "POST",
   });
 };
 
 export const syncAllCalendarFeeds = async () => {
-  if (isDemoMode()) {
-    return demo.syncAllDemoCalendarFeeds();
-  }
   return request<any>("/api/profile/calendar-feeds/sync-all", {
     method: "POST",
   });
 };
 
 export const deleteCalendarFeed = async (id: string) => {
-  if (isDemoMode()) {
-    return demo.deleteDemoCalendarFeed(id);
-  }
   return request<{ status: string; id?: string }>(`/api/profile/calendar-feeds/${id}`, {
     method: "DELETE",
   });
 };
 
 export const uploadGoogleCredentials = async (formData: FormData) => {
-  if (isDemoMode()) {
-    return demo.uploadDemoGoogleCredentials();
-  }
   const res = await fetch(`${API_BASE}/api/profile/upload-google-credentials`, {
     method: "POST",
     body: formData,
@@ -1072,11 +835,6 @@ export const uploadGoogleCredentials = async (formData: FormData) => {
 };
 
 export const uploadSyllabusDocument = async (formData: FormData) => {
-  if (isDemoMode()) {
-    const file = formData.get("file");
-    const filename = file && typeof file === "object" && "name" in file ? String((file as File).name) : "syllabus.md";
-    return demo.uploadDemoSyllabusDocument(filename);
-  }
   const res = await fetch(`${API_BASE}/api/profile/upload-document`, {
     method: "POST",
     body: formData,
@@ -1090,18 +848,12 @@ export const uploadSyllabusDocument = async (formData: FormData) => {
 };
 
 export const clearSampleData = async () => {
-  if (isDemoMode()) {
-    return demo.clearDemoSampleData();
-  }
   return request<any>("/api/profile/clear-sample-data", {
     method: "POST",
   });
 };
 
 export const getCalendarSyncStatus = async () => {
-  if (isDemoMode()) {
-    return demo.getDemoCalendarSyncStatus();
-  }
   return request<{
     mode: string;
     google_configured: boolean;
@@ -1110,9 +862,6 @@ export const getCalendarSyncStatus = async () => {
 };
 
 export const triggerGoogleSync = async () => {
-  if (isDemoMode()) {
-    return demo.triggerDemoGoogleSync();
-  }
   return request<any>("/api/calendar/trigger-google-sync", {
     method: "POST",
   });

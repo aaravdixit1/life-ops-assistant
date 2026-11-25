@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+#### Remove Demo Mode, Boilerplate & Legacy Sample Seeders (2026-11-25)
+- **Standalone Demo Mode & Boilerplate Removal:**
+  - Deleted all frontend Demo Mode files (`demo-mode.ts`, `demo-guard.ts`, `demo-service.ts`, `demo-data.ts`, `persona.ts`, `demo-badge.tsx`, `demo-mode.test.mjs`), unused `create-next-app` files (`frontend/README.md`, `frontend/public/*.svg`), and legacy backend sample seeders/syllabi (`seed_semester.py`, `seed_tentative_schedules.py`, `backend/data/syllabi/*`).
+  - Simplified `api.ts`, `profile-provider.tsx`, `sidebar.tsx`, `workspace-layout.tsx`, and app pages (`/academics`, `/brief`, `/health`, `/career`, `/setup`) to target the self-hosted FastAPI backend directly.
+  - Replaced `frontend/tests/demo-mode.test.mjs` with `frontend/tests/lib.test.mjs` testing `theme-engine.ts`, `formatters.ts`, and `calendar-visibility.ts`; updated `README.md`, `package.json`, `scripts/dev.mjs`, and `run.sh`.
+
 #### Collapsible Sidebars, Compact Themed Time Picker, CLI Shortcuts & Public-Release Audit (2026-11-25)
 - **Collapsible Workspace & Chat Sidebars (`workspace-layout.tsx`, `sidebar.tsx`, `assistant/page.tsx`):**
   - Added collapse/reopen controls (`PanelLeftClose` / floating `PanelLeftOpen`) and `⌘B` / `Ctrl+B` keyboard shortcut for the main 220px workspace sidebar with `localStorage` persistence (`lifeops-sidebar-open:v1`) and dynamic main-content left padding so reopened controls never overlap headings.

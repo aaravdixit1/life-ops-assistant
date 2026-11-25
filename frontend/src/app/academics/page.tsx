@@ -24,7 +24,6 @@ import {
 } from "@/lib/api";
 import { cleanAssignmentTitle, formatDateTime, formatDaysRemaining } from "@/lib/formatters";
 import { AssignmentDetailModal, AcademicAssignment } from "@/components/academics/assignment-modal";
-import { isDemoMode } from "@/lib/demo-mode";
 import { useProfile } from "@/components/profile-provider";
 import { Sparkles } from "lucide-react";
 
@@ -124,12 +123,8 @@ export default function AcademicsPage() {
 
   const handleRefreshSession = async () => {
     try {
-      const res = await refreshCanvasSession();
-      if (isDemoMode()) {
-        setSyncMsg(res.message || "Demo mode: Canvas authentication is simulated.");
-      } else {
-        setSyncMsg("Launched headed browser for Canvas CAS / Duo SSO login.");
-      }
+      await refreshCanvasSession();
+      setSyncMsg("Launched headed browser for Canvas SSO login.");
       setTimeout(() => setSyncMsg(null), 5000);
     } catch (e: any) {
       setSyncMsg(`Could not launch login: ${e.message}`);

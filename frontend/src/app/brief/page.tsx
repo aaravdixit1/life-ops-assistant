@@ -42,11 +42,10 @@ import { EventDetailModal } from "@/components/calendar/event-modals";
 import { FormattedMarkdown } from "@/components/ui/formatted-content";
 import { getHiddenCalendarIds, isCalendarVisible } from "@/lib/calendar-visibility";
 import { formatDateTime, cleanAssignmentTitle } from "@/lib/formatters";
-import { PERSONA } from "@/lib/persona";
 import { useProfile } from "@/components/profile-provider";
 
 export default function DailyBriefPage() {
-  const { profile, isDemo, termLabel, locationLabel, studySanctuary, academicProfile } = useProfile();
+  const { profile, termLabel, locationLabel, studySanctuary, academicProfile } = useProfile();
   const [brief, setBrief] = useState<any | null>(null);
   const [curiosity, setCuriosity] = useState<any | null>(null);
   const [isShufflingFact, setIsShufflingFact] = useState(false);
@@ -1140,9 +1139,7 @@ ${ed.reading?.title ? `* ${ed.reading.title} by ${ed.reading.author} — ${ed.re
               <div className="flex items-center gap-2">
                 <Newspaper className="w-4 h-4 text-[var(--accent-primary)]" />
                 <span className="text-micro font-mono uppercase tracking-wider text-[var(--text-primary)] font-bold">
-                  {isDemo
-                    ? PERSONA.newsDispatch
-                    : profile?.institution?.trim()
+                  {profile?.institution?.trim()
                     ? `${profile.institution.trim()} Dispatch`
                     : "Local & Campus Pulse"}
                 </span>

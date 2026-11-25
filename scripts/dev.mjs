@@ -160,23 +160,6 @@ function runBuild() {
   execSync("npm run build", { cwd: frontendDir, stdio: "inherit" });
 }
 
-function runDemo() {
-  console.log(bold(green("\n🚀 Starting Life-Ops Assistant in Standalone DEMO Mode...\n")));
-  console.log(yellow("• Zero backend required (no Docker, no Python, no database, no keys)"));
-  console.log(yellow("• Running fictional student persona: Alex Chen"));
-  console.log(yellow("• All network calls strictly guarded in-browser\n"));
-
-  ensureFrontendDependencies();
-
-  const child = spawn("npm", ["run", "dev:demo"], {
-    cwd: frontendDir,
-    stdio: "inherit",
-    env: { ...process.env, NEXT_PUBLIC_DEMO_MODE: "true" },
-  });
-
-  child.on("exit", (code) => process.exit(code || 0));
-}
-
 function runBackendOnly() {
   console.log(bold(cyan("\n⚡ Starting FastAPI Backend on http://127.0.0.1:8000...\n")));
   const uvicornBin = getUvicornPath();
@@ -256,9 +239,6 @@ function runAll() {
 switch (mode) {
   case "setup":
     runSetup();
-    break;
-  case "demo":
-    runDemo();
     break;
   case "backend":
     runBackendOnly();

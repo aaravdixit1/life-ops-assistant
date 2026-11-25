@@ -14,7 +14,7 @@ const SIDEBAR_OPEN_KEY = "lifeops-sidebar-open:v1";
 
 function WorkspaceShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { profile, loading, isDemo } = useProfile();
+  const { profile, loading } = useProfile();
   const [dismissed, setDismissed] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -73,7 +73,6 @@ function WorkspaceShell({ children }: { children: React.ReactNode }) {
   };
 
   const showOnboardingBanner =
-    !isDemo &&
     !loading &&
     Boolean(profile) &&
     !profile?.onboarding_completed &&

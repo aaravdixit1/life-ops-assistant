@@ -12,9 +12,7 @@
 
 ---
 
-### [🚀 Live Interactive Demo](https://life-ops-assistant.vercel.app)
-
-> **Note:** Demo runs on sample data for fictional student **Alex Chen** with a simulated assistant. The full version runs locally with FastAPI, PostgreSQL, and local/cloud models—and ships with a built-in `/setup` onboarding wizard so anyone cloning the repo can connect their own calendars, Canvas feed, location, and macro goals in minutes.
+> **Built-in `/setup` Onboarding:** Connect your Canvas `.ics` feed, external calendars (Google, Apple `webcal://`, Outlook, or `.ics` files), location/timezone, optional Gemini Free Tier key, and macro goals straight from the browser in minutes.
 
 | Daily Operational Dispatch (`/brief`) | Adaptive Weekly Calendar (`/schedule`) |
 |:---:|:---:|
@@ -27,8 +25,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
-- [Quick Start: Standalone Demo Mode (Zero Dependencies)](#quick-start-standalone-demo-mode-zero-dependencies)
-- [Modes: Demo Mode vs Personal Mode](#modes-demo-mode-vs-personal-mode)
+- [Quick Start](#quick-start)
 - [Design Decisions](#design-decisions)
 - [Architectural Invariants & Cost Constraints](#architectural-invariants--cost-constraints)
 - [System Architecture](#system-architecture)
@@ -43,13 +40,8 @@
 - [Coolors.co Palette Engine](#coolorsco-palette-engine)
 - [Full-Stack Setup: Run Locally with Real Backend](#full-stack-setup-run-locally-with-real-backend)
   - [Prerequisites](#prerequisites)
-  - [Step 1: Clone and Configure Environment](#step-1-clone-and-configure-environment)
-  - [Step 2: Start PostgreSQL (`pgvector`)](#step-2-start-postgresql-pgvector)
-  - [Step 3: Backend Setup](#step-3-backend-setup)
-  - [Step 4: Connect Your Integrations via `/setup` (or CLI)](#step-4-connect-your-integrations-via-setup-or-cli)
-  - [Step 5: Frontend Setup](#step-5-frontend-setup)
-  - [One-Command Runner Scripts](#one-command-runner-scripts)
-  - [Deploying Demo Mode to Vercel](#deploying-demo-mode-to-vercel)
+  - [Fast Path: Two Short Commands](#fast-path-two-short-commands)
+  - [Shortened Root Commands Reference](#shortened-root-commands-reference)
 - [Dual-Model Router & Exam Mode](#dual-model-router--exam-mode)
 - [Limitations, Privacy & Security](#limitations-privacy--security)
 - [Verification & Testing](#verification--testing)
@@ -66,36 +58,20 @@ Unifying unstructured inputs (Canvas calendar feeds, multi-provider `.ics`/`webc
 
 ---
 
-## Quick Start: Standalone Demo Mode (Zero Dependencies)
-
-Try the full interactive dashboard immediately in your browser—**no Docker, no Python, no database, and no API keys required**:
+## Quick Start
 
 ```bash
 git clone https://github.com/aaravdixit1/life-ops-assistant.git
 cd life-ops-assistant
 
-# Install frontend dependencies and launch standalone demo
-npm run dev:demo
-# or: ./run.sh demo
+# 1. One-time bootstrap (.env, Postgres Docker, Python .venv, DB schema, npm deps)
+npm run setup        # or: ./run.sh setup
+
+# 2. Launch PostgreSQL + FastAPI (:8000) + Next.js (:3000)
+npm run dev          # or: ./run.sh
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The app runs entirely inside your browser using dynamic realistic sample data for fictional student **Alex Chen**, complete with simulated AI chat, 1-click autopilot rollbacks, and interactive calendar/macro logging.
-
----
-
-## Modes: Demo Mode vs Personal Mode
-
-Life-Ops Assistant supports two distinct operational modes:
-
-| Feature / Invariant | 🌐 Demo Mode (Recruiter / Vercel Preview) | 🏢 Personal Mode (Local Full-Stack) |
-|---|---|---|
-| **Intended User** | Public evaluators, recruiters, portfolio preview | Self-hosted personal daily operations |
-| **Backend & DB Required?** | **No** (100% standalone, runs purely in browser) | **Yes** (FastAPI on `:8000` + PostgreSQL via Docker) |
-| **Data Source** | In-memory dynamic fixtures with `localStorage` persistence | Live PostgreSQL, Canvas/iCal feeds, Open-Meteo, local/cloud models |
-| **User Identity** | Fictional student persona (**Alex Chen**, Fall 2026) | Your configured `/setup` profile (`user_profile`) |
-| **External Network Calls** | **Strictly Forbidden** (Hard client-side network guard) | Active REST calls to local FastAPI, configured feeds, & model router |
-| **How to Run** | `npm run dev:demo` or `./run.sh demo` | `npm run dev` or `./run.sh` |
-| **Deployment Target** | 1-click Vercel deployment (`NEXT_PUBLIC_DEMO_MODE=true`) | Local-first (bound to `127.0.0.1`) |
+Open **[http://localhost:3000/setup](http://localhost:3000/setup)** to configure your profile, calendars, Canvas feed, and macro goals.
 
 ---
 
@@ -297,7 +273,6 @@ Run any of these from the repository root (`npm run <cmd>` or `./run.sh <arg>`):
 |---|---|---|
 | `npm run setup` | `./run.sh setup` | One-time bootstrap: creates `.env`, starts Postgres, creates `backend/.venv`, installs Python & npm deps, and initializes the DB schema. |
 | `npm run dev` | `./run.sh` | Starts PostgreSQL container, FastAPI (`127.0.0.1:8000`), and Next.js (`:3000`) in one unified terminal. |
-| `npm run demo` | `./run.sh demo` | Installs frontend dependencies if needed and starts Next.js in Standalone Demo Mode (`http://localhost:3000`) with zero backend dependencies. |
 | `npm run canvas:login` | `./run.sh canvas-login` | Launches Playwright Canvas SSO login helper (`storageState.json`) without manually activating `.venv`. |
 | `npm run backend` | `./run.sh backend` | Starts only the FastAPI backend on `127.0.0.1:8000`. |
 | `npm run frontend` | `./run.sh frontend` | Starts only the Next.js frontend on `:3000`. |
@@ -354,19 +329,6 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ---
 
-### Deploying Demo Mode to Vercel
-
-To deploy the standalone demo to Vercel:
-1. Connect the repository in the **Vercel Dashboard**.
-2. **Crucial:** In **Project Settings** → **Build & Development Settings**, set **Root Directory** to `frontend`.
-3. In **Environment Variables**, add:
-   ```env
-   NEXT_PUBLIC_DEMO_MODE=true
-   ```
-4. Deploy. Vercel builds the Next.js app with demo mode active.
-
----
-
 ## Dual-Model Router & Exam Mode
 
 Life-Ops Assistant uses a **Dual-Model Router** (`backend/app/services/model_router.py`):
@@ -394,7 +356,6 @@ flowchart LR
 ### Privacy
 - **What Goes to Cloud LLMs:** When routing queries to Google Gemini, general prompt contents (such as calendar summaries or assignment specs) are processed via Google AI Studio's Free Tier. Under Google's free-tier terms, data may be used to train or improve models.
 - **Local Knowledge Base Residency:** Personal dossier entries (residence, private notes, and dietary rules from `user_knowledge_base`) are automatically excluded from cloud prompts by default to preserve privacy. Setting `CLOUD_LLM_ENABLED=false` enforces 100% local data residency; if Ollama is unreachable when cloud routing is disabled, the router halts with an explicit error rather than silently calling Gemini.
-- **Demo Mode Isolation:** Standalone Demo Mode is completely isolated: all external network requests are intercepted and blocked by a client-side network guard.
 
 ### Security & Prompt Injection Blast Radius
 - **Untrusted Ingestion:** Canvas assignment descriptions, announcements, external `.ics` feeds, and syllabus text are treated as untrusted user input.
@@ -409,7 +370,7 @@ flowchart LR
 
 Run everything from the repo root with shortened commands (`./run.sh test` / `./run.sh build` or `npm run ...`):
 
-### Run All Suites (`pytest` + Frontend Demo Tests)
+### Run All Suites (`pytest` + Frontend Unit Tests)
 ```bash
 npm run test:all
 # or: ./run.sh test
@@ -418,7 +379,7 @@ npm run test:all
 ### Individual Checks
 ```bash
 npm run test:backend   # Backend pytest suite (API, Canvas .ics, Gatekeeper, Router, Store Catalog)
-npm test               # Frontend Demo Mode invariant & network-guard tests
+npm test               # Frontend unit tests (Theme engine, Formatters, Calendar visibility)
 npm run build          # Next.js TypeScript + Turbopack production build
 ```
 
@@ -429,10 +390,10 @@ npm run build          # Next.js TypeScript + Turbopack production build
 ```text
 life-ops-assistant/
 ├── LICENSE                  # MIT License
-├── package.json             # Root unified runner commands (npm run dev / dev:demo)
+├── package.json             # Root unified runner commands (npm run setup / dev / test:all)
 ├── run.sh                   # Friendly 1-command launcher
 ├── scripts/
-│   └── dev.mjs              # Unified process manager & port cleaner
+│   └── dev.mjs              # Unified process manager, setup bootstrap, & port cleaner
 ├── .env.example             # Template environment variables
 ├── docker-compose.yml       # PostgreSQL 16 + pgvector container definition
 ├── GEMINI.md                # Invariants, guardrails, and architectural rules
@@ -441,10 +402,8 @@ life-ops-assistant/
 │   └── images/              # Documentation screenshots
 ├── backend/
 │   ├── requirements.txt     # Python dependencies
-│   ├── schema.sql           # Database schema, pgvector indices, and baseline fixtures
+│   ├── schema.sql           # Database schema & pgvector indices
 │   ├── pytest.ini           # Pytest configuration
-│   ├── data/
-│   │   └── syllabi/         # Generic sample course syllabi for RAG testing
 │   ├── app/
 │   │   ├── main.py          # FastAPI application entrypoint & scheduler init
 │   │   ├── config.py        # Pydantic v2 application settings
@@ -474,7 +433,7 @@ life-ops-assistant/
     ├── package.json         # Next.js 16 + React 19 dependencies & scripts
     ├── next.config.ts       # Next.js Turbopack configuration
     ├── tests/
-    │   └── demo-mode.test.mjs # Standalone demo mode invariant test suite
+    │   └── lib.test.mjs     # Frontend theme-engine, formatter, & visibility unit tests
     └── src/
         ├── app/
         │   ├── setup/       # Student onboarding, feeds, Gemini key & RAG setup
@@ -483,16 +442,13 @@ life-ops-assistant/
         │   ├── academics/   # Canvas deliverable radar & AI spec tabs
         │   ├── health/      # Meal prep, macro gauges & live nearby groceries
         │   ├── assistant/   # Scoped assistant with persistent deletable chat logs
-        │   └── career/      # Resume RAG upload & internship pipeline
+        │   └── career/      # Resume RAG upload & synced career pipeline
         ├── components/      # Collapsible sidebar, portal selects, modals & theme controls
         └── lib/
-            ├── api.ts       # Type-safe client fetch abstractions
-            ├── theme-engine.ts # Coolors.co URL parser & OKLCH generator
-            ├── demo-mode.ts   # Demo environment detection & local toggles
-            ├── demo-guard.ts  # Hard network guard (blocks external/API calls)
-            ├── demo-service.ts# In-memory & localStorage mock service layer
-            ├── demo-data.ts   # Dynamic sample fixtures for Alex Chen
-            └── persona.ts     # Fictional vs local private profile switcher
+            ├── api.ts       # Type-safe FastAPI client abstractions
+            ├── calendar-visibility.ts # Calendar feed visibility persistence
+            ├── formatters.ts# Date, time, and assignment title formatting helpers
+            └── theme-engine.ts # Coolors.co URL parser & OKLCH generator
 ```
 
 ---

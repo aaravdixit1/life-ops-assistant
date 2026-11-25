@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { WorkspaceLayout } from "@/components/workspace-layout";
-import { PERSONA } from "@/lib/persona";
 
 export const metadata: Metadata = {
   title: "Life-Ops Assistant",
