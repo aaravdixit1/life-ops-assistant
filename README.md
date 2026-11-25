@@ -35,10 +35,10 @@
   - [3. Canvas Academic Ingestion (`/academics`)](#3-canvas-academic-ingestion-academics)
   - [4. Personal Chief-of-Staff Assistant (`/assistant`)](#4-personal-chief-of-staff-assistant-assistant)
   - [5. Health & Lean Bulk Engine (`/health`)](#5-health--lean-bulk-engine-health)
-  - [6. Career & Habit Cadence Hub (`/career`)](#6-career--habit-cadence-hub-career)
+  - [6. Career & Resume RAG Hub (`/career`)](#6-career--resume-rag-hub-career)
 - [First-Run Setup & Integrations (`/setup`)](#first-run-setup--integrations-setup)
 - [Coolors.co Palette Engine](#coolorsco-palette-engine)
-- [Full-Stack Setup: Run Locally with Real Backend](#full-stack-setup-run-locally-with-real-backend)
+- [Local Setup & Commands](#local-setup--commands)
   - [Prerequisites](#prerequisites)
   - [Fast Path: Two Short Commands](#fast-path-two-short-commands)
   - [Shortened Root Commands Reference](#shortened-root-commands-reference)
@@ -180,7 +180,7 @@ flowchart TD
 ## Key Features & Surfaces
 
 ### 1. Daily Executive Briefing (`/brief`)
-- **Weather & Commute Advisory:** Live temperature curves, precipitation probability, and clothing advisories via **Open-Meteo** for your configured city and timezone (simulated campus weather in demo mode).
+- **Weather & Commute Advisory:** Live temperature curves, precipitation probability, and clothing advisories via **Open-Meteo** for your configured city and timezone.
 - **Dynamic Timeline Rhythm:** Real-time schedule generated directly from Postgres `calendar_events` with live in-progress countdown indicators and travel blocks.
 - **Canvas Deliverable Radar:** Real-time countdowns for assignments due today and across the 72-hour horizon, tracking submission status and grace windows.
 - **Curated Reading Spotlight:** Daily literary spotlight synchronized with your reading shelf.
@@ -198,7 +198,7 @@ flowchart TD
 - **1-Click Submission Toggle:** Toggle assignments between `unsubmitted` and `submitted` with live cross-page calendar & brief synchronization.
 
 ### 4. Personal Chief-of-Staff Assistant (`/assistant`)
-- **Persistent, Deletable Chat Logs & Cross-Session Recall:** Saves multi-turn conversations and interactive card payloads (`assistant_sessions` & `assistant_messages` in PostgreSQL, plus `localStorage` in Demo Mode), automatically restores your last active conversation when navigating back, supports 1-click thread switching and deletion, and pulls recent prior chats for context.
+- **Persistent, Deletable Chat Logs & Cross-Session Recall:** Saves multi-turn conversations and interactive card payloads (`assistant_sessions` & `assistant_messages` in PostgreSQL), automatically restores your last active conversation when navigating back, supports 1-click thread switching and deletion, and pulls recent prior chats for context.
 - **Strictly Scoped & Card-Enabled:** Handles workspace greetings, schedule queries, Canvas deadlines, personal memory facts, and natural-language appointment proposals with interactive commitment/inspection cards while explicitly refusing out-of-scope general trivia without searching the web.
 - **Collapsible Chat Rail & App Sidebar:** Toggle the desktop Chat Logs panel independently or collapse/expand the main workspace sidebar anytime (`⌘B` / `Ctrl+B` or the header toggle button).
 
@@ -214,7 +214,7 @@ flowchart TD
 
 ## First-Run Setup & Integrations (`/setup`)
 
-When running Life-Ops Assistant locally in Personal Mode for the first time, open **`/setup`** in your browser (also accessible anytime from the sidebar) to configure everything without hand-editing database rows:
+When running Life-Ops Assistant for the first time, open **`/setup`** in your browser (also accessible anytime from the sidebar) to configure everything without hand-editing database rows:
 
 1. **College Profile, Location & Weather Radius:**
    - Configure your **Name**, **University**, **Class Standing**, **Expected Graduation**, multi-chip **Major(s) & Optional Minor(s)** (supporting double/triple majors), **Career Track / Target Role**, **Timezone**, **Compact Wake / Sleep Time Pickers**, **City**, and **`1–25 mi` Grocery Radius** (with live Open-Meteo weather).
@@ -239,7 +239,7 @@ Life-Ops Assistant includes an interactive theme generator:
 
 ---
 
-## Full-Stack Setup: Run Locally with Real Backend
+## Local Setup & Commands
 
 ### Prerequisites
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or OrbStack)
@@ -276,7 +276,7 @@ Run any of these from the repository root (`npm run <cmd>` or `./run.sh <arg>`):
 | `npm run canvas:login` | `./run.sh canvas-login` | Launches Playwright Canvas SSO login helper (`storageState.json`) without manually activating `.venv`. |
 | `npm run backend` | `./run.sh backend` | Starts only the FastAPI backend on `127.0.0.1:8000`. |
 | `npm run frontend` | `./run.sh frontend` | Starts only the Next.js frontend on `:3000`. |
-| `npm run test:all` | `./run.sh test` | Runs both backend `pytest` and frontend Demo Mode invariant tests. |
+| `npm run test:all` | `./run.sh test` | Runs both backend `pytest` and frontend unit tests. |
 | `npm run build` | `./run.sh build` | Runs the Next.js production build verification. |
 | `npm run stop` | `./run.sh stop` | Frees lingering processes on ports `8000`, `3000`, and `3001`. |
 
@@ -337,7 +337,7 @@ Life-Ops Assistant uses a **Dual-Model Router** (`backend/app/services/model_rou
 flowchart LR
     Query[User Query] --> Classify{Complexity Classifier}
     Classify -->|Simple Parsing & Lookups| Local[Ollama / MLX<br/>llama3.2:3b on Apple Silicon]
-    Classify -->|Complex Rescheduling & Multi-source| Gemini[Google AI Studio Free Tier<br/>gemini-2.5-flash]
+    Classify -->|Complex Rescheduling & Multi-source| Gemini[Google AI Studio Free Tier<br/>Gemini Flash]
     Local -.->|Automatic Fallback if offline| Gemini
 ```
 
@@ -456,4 +456,4 @@ life-ops-assistant/
 ## License & Disclaimer
 
 - **License:** Distributed under the [MIT License](LICENSE) (`Copyright (c) 2026 Life-Ops Assistant Contributors`).
-- **Built with:** [FastAPI](https://fastapi.tiangolo.com/), [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), [pgvector](https://github.com/pgvector/pgvector), [Open-Meteo](https://open-meteo.com/), and [Lucide Icons](https://lucide.dev/).
+- **Built with:** [FastAPI](https://fastapi.tiangolo.com/), [Next.js](https://nextjs.org/), [Tailwind CSS](https://tailwindcss.com/), [pgvector](https://github.com/pgvector/pgvector), [Open-Meteo](https://open-meteo.com/), [OpenStreetMap](https://www.openstreetmap.org/), [Open Food Facts](https://world.openfoodfacts.org/), and [Lucide Icons](https://lucide.dev/).
